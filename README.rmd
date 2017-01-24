@@ -1,0 +1,5 @@
+> # I'm very exited about this course because I like learning new things about statistics and data analysis. I have already used some R in earlier courses but I can't say that my skills are on a professional level. 
+> # I'm a bit disappointed that I did not find a way to download R-Studio to my own computer and I have to work at school for this course. Also I was not able to download Github or GIT for the schools computer because the administration forbids that. 
+> Anyway I will just link my stuff to the online version since there was not another way to do that. 
+
+> # https://ollranta.github.io/IODS-project/
