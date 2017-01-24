@@ -1,0 +1,4 @@
+Things I will learn on this course will include: Data analysis, R, R-studio and Github.
+The course evaluation criteria is based on weekly exercises and the final project work.
+
+https://ollranta.github.io/IODS-project/
