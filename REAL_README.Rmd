@@ -1,3 +1,5 @@
+# Olli Rantanen, 25.1.2017, First exercise
+
 Things I will learn on this course will include: Data analysis, R, R-studio and Github.
 The course evaluation criteria is based on weekly exercises and the final project work.
 
@@ -15,6 +17,8 @@ Data was gathered from the students of the previous course (2014). The dataset h
 I made a graph which contains the relationship between points and attitude. As you can see from the picture, the points got from the grade correlate with the attitude towards statistics. So if you have a healthy attitude towards statistics, you also get a better grade. Also gender does not really affect the bigger picture. 
 
 Here you can see the summary of the data variables. 
+
+
 The next picture tells us how the different variables correlate with each other in a bigger picture. It is use d to quickly explore the relationship between multiple variables in a data frame.  As you can see when for example attitude on the x-axis and y-axis collide the picture shows us how distributed attitude is between Man and Woman. Then on the left you can see distribution of data between other variables. On the right side you can see how they correlate with each other also with the gender.
 
 3.		 
@@ -23,6 +27,7 @@ So the both factors still affect to the points scored from the test. Basically w
 
 4.  
 In both of these pictures you can see the R-squared value which means the coefficient of determination. The number tells us how good our model in the real world basically is.  The r-squared value grows when you add more variables to the model. The adjusted r-squared is better because it takes into account the number of variables and it cannot be manipulated this way.  
+
 5.
 The picture above features all the diagnostic plots needed.  Residuals vs fitted shows if the residuals have non-linear pattern. In our plot it does have a linear pattern. 
 Normal Q-Q plot shows if the residuals are normally distributed. If the residuals are not fitted at all on the straight line they are not normally distributed. On our case that is not the question and the residuals are pretty much normally distributed.
