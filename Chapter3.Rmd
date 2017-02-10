@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Third exercise with R-studio -Olli Rantanen, Logistic regression, 8.2.2017
+### (As you can see the work misses the pictures, I'm sorry about that but I did not find a way to fix that. Maybe that does not matter since I have explained pretty much what the pictures indicated.)
 
 At this chapter we will find new ways to handle data with logistic regression. I'm really looking forward to this and let's see how I will succeed with these exercises. 
  
@@ -123,13 +124,13 @@ Our model is made in a way it predicts the probability of using a lot of alcohol
 
 The chart below tells us the real data on the left side and the prediction model on right side. The chart indicates that when the prediction model predicts that there is a false in high_use, 66.2 % of the times it is correct. However when it predicts true it is 24.3 % wrong of the prediction times. When the prediction says true it is wrong 3.9 % of the times and correct 5.5 % of the times. 
 
-![](nelj‰s_sum.JPG)
+![](nelj√§s_sum.JPG)
 
 
 
 
 
-![](nelj‰s.png)
+![](nelj√§s.png)
 
 
 
@@ -148,5 +149,5 @@ I could not find such model which could beat the datacamp model.
 ### Conclusion
 It seems our model and hypothesis were pretty good predicting the likelihood of high alcohol usage. Also the picked variables worked fine with this exercise. My personal hypothesis worked pretty well, considering 2/4 were correct and the last two were not totally wrong. The Datacamp error rate was lower than ours which is unfortunate, still I think I did a pretty good job with the prediction error of only 2.3 % higher than the datacamp. The exercise was quite long and time consuming. Luckily the Datacamp helped a lot making these models and I think I also learned a lot of new things about statistics
 
-
+As you can see the work misses the pictures, I'm sorry about that but I did not find a way to fix that. Maybe that does not matter since I have explained pretty much what the pictures indicated.
 All my code for the second part can be found here <https://github.com/ollranta/IODS-project/blob/master/code_C3>
