@@ -1,7 +1,86 @@
-# Insert chapter 2 title here
+# Olli Rantanen, 1.2.2017, Second exercise on R-Studio.
 
-*Describe the work you have done this week and summarize your learning.*
+I started this exercises by "reading" the data of the learning2014 to the R-studio. Then I explored the statistical characteristics of the data. It was easier to do this exercise after the datacamp exercises because almost all of these were related to each other. This made it pretty straight forward to do and it did not require that much time.  
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
+1.
+Data was gathered from the students of the previous course (2014). The dataset has been cleared of those responders who had scored 0 points from the exam. We can explore these features by calling str() and dim() commands to our data.  Our dataset has 166 rows and 7 columns.  Str command tells us that the seven mentioned variables are gender, age, attitude, deep, stra, surf and points. Gender variable have only 2 options: woman and man. Of the respondents 56 were males and 110 were females. Age variable depends on the person's age (mean 25.5) and points variable tells us how well they did score from the test (mean 22.7). The other variables are in a likert-scale which means they have values ranging from 1-5. 
+
+
+
+2. 
+I made a graph which contains the relationship between points and attitude. As you can see from the picture, the points got from the grade correlate with the attitude towards statistics. So if you have a healthy attitude towards statistics, you also get a better grade. Also gender does not really affect the bigger picture. 
+
+
+
+![](Rplot.png)
+
+
+Here you can see the summary of the data variables. 
+
+![](12summary.jpg)
+
+
+
+The next picture tells us how the different variables correlate with each other in a bigger picture. It is use d to quickly explore the relationship between multiple variables in a data frame.  As you can see when for example attitude on the x-axis and y-axis collide the picture shows us how distributed attitude is between Man and Woman. Then on the left you can see distribution of data between other variables. On the right side you can see how they correlate with each other also with the gender.
+
+
+![](oikee.png)
+
+
+
+3.		 
+I chose as explanatory variables - attitude, stra and deep. As you can see on the summary photo, attitude seems to be the most significant factor affecting to the points. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+![](3ex_hyvä.JPG)
+
+
+
+So the both factors still affect to the points scored from the test. Basically we can say that attitude is still the biggest factor explaining good points from the test. 
+
+
+
+![](3ex2_hyvä.JPG)
+
+
+
+
+4.  
+In both of these pictures you can see the R-squared value which means the coefficient of determination. The number tells us how good our model in the real world basically is.  The r-squared value grows when you add more variables to the model. The adjusted r-squared is better because it takes into account the number of variables and it cannot be manipulated this way.  
+
+
+
+
+
+
+
+
+![](5ex.png)
+
+
+5.
+The picture above features all the diagnostic plots needed.  Residuals vs fitted shows if the residuals have non-linear pattern. In our plot it does have a linear pattern which means our model works fine.
+
+Normal Q-Q plot shows if the residuals are normally distributed. If the residuals are not fitted at all on the straight line they are not normally distributed. On our case that is not the question and the residuals are pretty much normally distributed.
+
+On our last plot Residuals vs leverage we can interpret the extreme values. Tells us which points have the greatest influence on the regression. On this plot, focus is on the extreme cases and their influence to the regression analysis or the absence of this.  When cases (dots) are outside of the red lide( cook's distance) the cases are influential to the regression results.
+
+To conclude the exercise, we can see that the exam result tends to be better with student use strategic learning and evern more if their attitude towards statistics is positive.
+
+
+All my code is on the folder https://github.com/ollranta/IODS-project/blob/master/data < Unfortunately I was not able
+to add the code because some error message always came when I tried to upload it. I hope this does not ruin your day
+however and you are able to read it from the link. 
+
