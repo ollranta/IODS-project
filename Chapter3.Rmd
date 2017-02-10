@@ -1,0 +1,152 @@
+---
+title: "Chapter 3"
+author: "Olli Rantanen"
+date: "8 helmikuuta 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Third exercise with R-studio -Olli Rantanen, Logistic regression, 8.2.2017
+
+At this chapter we will find new ways to handle data with logistic regression. I'm really looking forward to this and let's see how I will succeed with these exercises. 
+ 
+Data got from <https://archive.ics.uci.edu/ml/machine-learning-databases/00356/>
+
+### Reading the tables to R
+```
+mat <- read.csv("file:///Z:/Documents/tilastoi/Opendatasciense/chapter3/student-mat.csv", sep=";", header = T)
+por <- read.csv("file:///Z:/Documents/tilastoi/Opendatasciense/chapter3/student-por.csv", sep = ";", header = T)
+```
+### Exploring the dimensions and structures of the dataset.
+```
+dim(mat)
+structure(mat)
+dim(por)
+structure(por)
+install.packages("dplyr")
+library("dplyr")
+install.packages("ggplot2")
+library("ggplot2")
+```
+### Joining the data based on these variables 
+```
+join_by <- c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet")
+```
+### Joining the two datasets
+```
+mat_por <- inner_join(mat, por, by = join_by, suffix = c(".math", ".por"))
+structure(mat_por)
+dim(mat_por)
+```
+### mat_por dataset has totally 382 observations and 53 variables. Now we can just copy the If statement (which is rather complicated to master on our own) from Datacamp
+
+```
+alco <- select(mat_por, one_of(join_by))
+notjoined_columns <- colnames(mat)[!colnames(mat) %in% join_by]
+print(notjoined_columns)
+for(column_name in notjoined_columns) {
+  two_columns <- select(mat_por, starts_with(column_name))
+  first_column <- select(two_columns, 1)[[1]]
+  if(is.numeric(first_column)) {
+    alco[column_name] <- round(rowMeans(two_columns))
+  } else { 
+    alco[column_name] <- first_column
+  }
+}
+```
+### Calculate the average consumption of alcohol in a week and also high_use
+```
+alco <- mutate(alco, alc_use= (Dalc + Walc)/2)
+alco <- mutate(alco, high_use = (alc_use) > 2)
+glimpse(alco)
+```
+### Observations: 382, Variables: 35
+### now we just have to save the table and then we can move to the actual exercise
+```
+write.csv(alco, file = "file:///Z:/Documents/tilastoi/Opendatasciense/chapter3/alco.csv" , row.names = F)
+alco_new <- read.csv("file:///Z:/Documents/tilastoi/Opendatasciense/chapter3/alco.csv")
+alco_new
+```
+### Analysis Part 1-2
+So for the final part of this exercise we will analyze the dataset which we just created about the student alcohol consumption. We should note that the data was edited for example we averaged the consumption to the whole week. Our dataset has 35 variables including information about personal attributes like: does he/she live in a rural part of the country, how much does he/she drink on a week and school success attributes like number of time failed on a test and grades.  Totally we have 382 observations of this data. There are both numerical answers and true or false answers in the dataset.I will link my code for this part on my github because I think it would distract reading.  <https://github.com/ollranta/IODS-project/blob/master/code_C3>
+
+####  These are the column names in our data
+```
+> colnames(alco_new)
+ [1] "school"      "sex"         "age"         "address"     "famsize"     "Pstatus"     "Medu"        "Fedu"       
+ [9] "Mjob"        "Fjob"        "reason"      "nursery"     "internet"    "guardian"    "traveltime"  "studytime"  
+[17] "failures"    "schoolsup"   "famsup"      "paid"        "activities"  "higher"      "romantic"    "famrel"     
+[25] "freetime"    "goout"       "Dalc"        "Walc"        "health"      "absences"    "G1"          "G2"         
+[33] "G3"          "alc_use"     "high_use"    "probability" "prediction" 
+```
+
+### 3 - 4. Four variables which I chose for the analysis
+Studytime, age, Famrel and Absences. The studytime is interesting because I would assume that people who study more tend to drink less than people who do not study that much. Age I chose because I think the age difference is quite big in this study 15-22 and I do not think that younger people drink as much as older people. Famrel-variable explains the quality of family relationships (1 very bad - 5 excellent) and I assume that people that have bad relationships with their families, tend to drink more. Absences I chose because I think it will be interesting to see if a lot of absences affect to the drinking. So let's start by adding boxplot of these variables to the consumption of alcohol. The boxplots are read in a way that on X-axis is False statetment, which means that the student is not a high alcohol user. The True side on the other hand means that the student is a high consumer of alcohol. On the Y-axis is for example likert scale from 1-5.  The genders are marked blue for boys and red for girls.
+
+### I chose variables famrel, Age, studytime and absences and I will use boxplots to find how they affect each other
+
+![](famrel.png)
+
+As we can see when the family relationship is better the consumption is lower and vice versa. This was our hypothesis also. Now let's do the same thing to Age.
+
+![](age.png)
+
+Interestingly it seems that younger woman tend to use alcohol more than older women, which is not on line with our hypothesis. On the other hand Men tend to consume more alcohol when they are older which is on line with the hypothesis. I must also address that the differences are not that high.
+
+![](studytime.png)
+
+We can see that our hypothesis of the studytime only affect the women. Men do not study that much it seems. The hypothesis was therefore correct only on the women's side.
+
+Let's see how the absences affect to drinking.
+
+![](absences.png)
+
+So it seems that the the more you are absent the more you consume alcohol. The difference is much higher with men but the difference can be seen also on the women side. The hypothesis was therefore correct.
+
+### 5. Logistic regression
+We use the logistic regression model to find out what is the probability of high use of alcohol according to our chosen variables. According to our just made model the biggest factor to low consumption is studytime and family relationship. The model also indicates that higher age contributes to bigger consumption as well as absences.  Our coefficients(Chart below) also indicate that they are all valid for our model. 
+
+![](eka.JPG)
+
+So this is what we got of our model with the cbind function, which interprets coefficients to odd ratios. Our widest confidence interval seems to be variable age (0.99 - 1.48) and the thinnest is absences (1.03 - 1.13). Intervals are read in a way for example that there is a 95 % probability that the odd ratio of absences is between the confidence interval (1.03 - 1.13). So the wider the interval, the more inaccurate is our model also. Odd ratios means the odds that an outcome will occur with the given exposure, compared to the odds of the outcome happening without the exposure. The higher the OR is, it is more likely that you consume alcohol and vice versa. This is according to our previous hypothesis and it seems that our model worked fine.
+
+![](toka.JPG)
+
+### 6. Predicting
+Our model is made in a way it predicts the probability of using a lot of alcohol TRUE if it is higher than 0.5. If it falls under that it says it is FALSE.  After that we can compare our own model and the prediction model.
+
+![](kolmas.JPG)
+
+
+The chart below tells us the real data on the left side and the prediction model on right side. The chart indicates that when the prediction model predicts that there is a false in high_use, 66.2 % of the times it is correct. However when it predicts true it is 24.3 % wrong of the prediction times. When the prediction says true it is wrong 3.9 % of the times and correct 5.5 % of the times. 
+
+![](neljäs_sum.JPG)
+
+
+
+
+
+![](neljäs.png)
+
+
+
+0.2827225 Is the mean prediction error of the predictive model. This means that 28.2 % of the model 
+predictions are incorrect compared to real data. 
+
+### Bonus 7.
+The 10-fold cross validation results for our model:
+0.2879581
+
+Datacamp-result 
+[1] 0.2643979
+So our model did worse than the datacamp model because it has a lower prediction error value than our model.
+I could not find such model which could beat the datacamp model.
+
+### Conclusion
+It seems our model and hypothesis were pretty good predicting the likelihood of high alcohol usage. Also the picked variables worked fine with this exercise. My personal hypothesis worked pretty well, considering 2/4 were correct and the last two were not totally wrong. The Datacamp error rate was lower than ours which is unfortunate, still I think I did a pretty good job with the prediction error of only 2.3 % higher than the datacamp. The exercise was quite long and time consuming. Luckily the Datacamp helped a lot making these models and I think I also learned a lot of new things about statistics
+
+
+All my code for the second part can be found here <https://github.com/ollranta/IODS-project/blob/master/code_C3>
