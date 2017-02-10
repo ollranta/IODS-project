@@ -1,0 +1,94 @@
+# So let's start the analysis part
+
+
+alco_new <- read.csv("file:///Z:/Documents/tilastoi/Opendatasciense/chapter3/alco.csv")
+alco_new
+
+dim(alco_new)
+structure(alco_new)
+colnames(alco_new)
+
+# So I chose variables famrel, Age, studytime and absences and I will use boxplots to find how they affect each other
+
+f1 <- ggplot(alco_new, aes(x= high_use, y= famrel, col= sex))
+f2 <- f1 + geom_boxplot()+ ylab("Family relationship") + xlab("High use")
+f3 <- f2 + ggtitle("Comparing family relationship to gender and alcohol consumption")
+f3
+
+# As we can see when the high use is true the consumption is bigger and vice versa. Now let's do the same thing to Age
+
+a1 <- ggplot(alco_new, aes(x= high_use, y= age, col= sex))
+a2 <- a1 + geom_boxplot()+ ylab("Age") + xlab("High use")
+a3 <- a2 + ggtitle("Comparing age to gender and alcohol consumption")
+a3
+
+# Interestingly it seems that younger woman tend to use alcohol more than older women, which is not on line
+# with our hypothesis. On the other hand Men tend to consume more alchol when they are older. I must also address that
+# the differences are not that high.
+
+
+g1 <- ggplot(alco_new, aes(x= high_use, y= studytime,col = sex))
+g2 <- g1 + geom_boxplot()+ ylab("studytime")+ xlab("High use")
+g3 <- g2 + ggtitle("Comparing studytime by gender and alcohol consumption")
+g3
+
+# We can see that our hypothesis of the studytime only affect the women. Men do not study that much it seems. 
+
+b1 <- ggplot(alco_new, aes(x= high_use, y= absences,col = sex))
+b2 <- b1 + geom_boxplot()+ ylab("absences")+ xlab("High use")
+b3 <- b2 + ggtitle("Comparing absences by gender and alcohol consumption")
+b3
+
+# So it seems that the the more you are absent the more you consume alcohol. The difference is much higher with men
+# but the difference can be seen also on the women side. 
+
+# Our hypothesis were correct on absences and famrel, partly correct with studytime and incorrect with age.
+
+# So let's start the logistic regression part of our exercise.
+
+mode <- glm(high_use ~ studytime + age + famrel + absences, data = alco_new, family = "binomial")
+structure(mode)
+
+# Let's compute the odd ratios by confidence intervals
+OR <- coef(mode) %>% exp
+CI <-  confint(mode) %>% exp
+cbind(OR, CI)
+
+# Then let's explore the predictive power of our model
+
+probabilities <- predict(mode, type = "response")
+alco_new <- mutate(alco_new, probability = probabilities)
+alco_new <- mutate(alco_new, prediction = probability > 0.5)
+table(high_use = alco_new$high_use, prediction = alco_new$prediction)
+
+# After that we visualize this
+
+g <- ggplot(alco_new, aes(x = probability, y = high_use, col = prediction))
+g + geom_point()
+table(high_use = alco_new$high_use, prediction = alco_new$prediction) %>% prop.table()  %>%  addmargins()
+
+# Then it's time for the mean prediction error, with the loss function
+
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+loss_func(class = alco_new$high_use, prob = alco_new$probability)
+
+
+# So after this we can do the 10-fold cross validation
+
+
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+(nrow(alco_new))
+
+# K-fold cross-validation
+library(boot)
+cv <- cv.glm(data = alco_new, cost = loss_func, glmfit = mode, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
