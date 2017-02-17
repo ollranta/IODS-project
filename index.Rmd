@@ -23,7 +23,7 @@ Things I will learn on this course will include: Data analysis, R, R-studio and 
 ```
 
 ***
-```{r child = "Chapter3.Rmd"}
+```{r child = "Chapter4.Rmd"}
 ```
 
 ***

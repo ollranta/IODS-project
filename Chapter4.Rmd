@@ -1,0 +1,383 @@
+---
+title: "Chapter4.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Chapter 4. Clustering and classification, Olli Rantanen 14.02.2017
+
+This time our exercise is about clustering and classification. Our data "Housing Values in Suburbs of Boston" has variables about crime, socioeconomical factors for example "lower status of the population" and many other kinds of information about the population on the area. The most important variable is crime (crim) which is described to represent the per capita crime rate by town. The data frame has 506 rows and 14 columns totally. 
+Let's bring our data and have a look of its structure
+
+```
+install.packages("MASS")
+library(MASS)
+data("Boston")
+str(Boston)
+dim(Boston)
+
+'data.frame':	506 obs. of  14 variables:
+ $ crim   : num  0.00632 0.02731 0.02729 0.03237 0.06905 ...
+ $ zn     : num  18 0 0 0 0 0 12.5 12.5 12.5 12.5 ...
+ $ indus  : num  2.31 7.07 7.07 2.18 2.18 2.18 7.87 7.87 7.87 7.87 ...
+ $ chas   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ nox    : num  0.538 0.469 0.469 0.458 0.458 0.458 0.524 0.524 0.524 0.524 ...
+ $ rm     : num  6.58 6.42 7.18 7 7.15 ...
+ $ age    : num  65.2 78.9 61.1 45.8 54.2 58.7 66.6 96.1 100 85.9 ...
+ $ dis    : num  4.09 4.97 4.97 6.06 6.06 ...
+ $ rad    : int  1 2 2 3 3 3 5 5 5 5 ...
+ $ tax    : num  296 242 242 222 222 222 311 311 311 311 ...
+ $ ptratio: num  15.3 17.8 17.8 18.7 18.7 18.7 15.2 15.2 15.2 15.2 ...
+ $ black  : num  397 397 393 395 397 ...
+ $ lstat  : num  4.98 9.14 4.03 2.94 5.33 ...
+ $ medv   : num  24 21.6 34.7 33.4 36.2 28.7 22.9 27.1 16.5 18.9 ...
+ 
+ [1] 506  14
+```
+And let's have a closer look of the variables of the data frame
+
+![](4_eka.jpg)
+
+
+After that we can focus on making a graphical summary with correlation matrix
+
+```
+cor_matrix<-cor(Boston)
+
+cor_matrix<-cor(Boston) %>% round(digits=2)
+
+corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
+```
+
+
+![](corplott1.png)
+
+From this matrix you can see how the variables correlate negatively or positevely with each other. 
+For example dis "weighted mean of distances to five Boston employment centres" correlates very negatively with age"proportin of owner-occupied units built prior to 1940", nox" nitrogen oxides concentration (parts per 10 million)" and indus"proportion of non-retail business acres per town". So the bigger and redder the circle the more negative the correlation. 
+Positively correlated are the circles which are big and most blue. For example rad "accessibility to radial highways"
+and tax "full-value property-tax rate per\$10,000" correlate the most within our dataset. This chart makes it very easy to make observations of the correlation between the variables.
+
+
+```
+> cor_matrix
+         crim    zn indus  chas   nox    rm   age   dis   rad   tax ptratio black lstat  medv
+crim     1.00 -0.20  0.41 -0.06  0.42 -0.22  0.35 -0.38  0.63  0.58    0.29 -0.39  0.46 -0.39
+zn      -0.20  1.00 -0.53 -0.04 -0.52  0.31 -0.57  0.66 -0.31 -0.31   -0.39  0.18 -0.41  0.36
+indus    0.41 -0.53  1.00  0.06  0.76 -0.39  0.64 -0.71  0.60  0.72    0.38 -0.36  0.60 -0.48
+chas    -0.06 -0.04  0.06  1.00  0.09  0.09  0.09 -0.10 -0.01 -0.04   -0.12  0.05 -0.05  0.18
+nox      0.42 -0.52  0.76  0.09  1.00 -0.30  0.73 -0.77  0.61  0.67    0.19 -0.38  0.59 -0.43
+rm      -0.22  0.31 -0.39  0.09 -0.30  1.00 -0.24  0.21 -0.21 -0.29   -0.36  0.13 -0.61  0.70
+age      0.35 -0.57  0.64  0.09  0.73 -0.24  1.00 -0.75  0.46  0.51    0.26 -0.27  0.60 -0.38
+dis     -0.38  0.66 -0.71 -0.10 -0.77  0.21 -0.75  1.00 -0.49 -0.53   -0.23  0.29 -0.50  0.25
+rad      0.63 -0.31  0.60 -0.01  0.61 -0.21  0.46 -0.49  1.00  0.91    0.46 -0.44  0.49 -0.38
+tax      0.58 -0.31  0.72 -0.04  0.67 -0.29  0.51 -0.53  0.91  1.00    0.46 -0.44  0.54 -0.47
+ptratio  0.29 -0.39  0.38 -0.12  0.19 -0.36  0.26 -0.23  0.46  0.46    1.00 -0.18  0.37 -0.51
+black   -0.39  0.18 -0.36  0.05 -0.38  0.13 -0.27  0.29 -0.44 -0.44   -0.18  1.00 -0.37  0.33
+lstat    0.46 -0.41  0.60 -0.05  0.59 -0.61  0.60 -0.50  0.49  0.54    0.37 -0.37  1.00 -0.74
+medv    -0.39  0.36 -0.48  0.18 -0.43  0.70 -0.38  0.25 -0.38 -0.47   -0.51  0.33 -0.74  1.00
+```
+
+After that we can scale the variables to standardize the data set. If you compare this variable summary to the previous summary, you can see that the scales are very different on the first summary compared to the scaled one. For example on the first summary the minimum value of tax is "187" and maximum "711" compared to nox where minimum is "0.3850" and maximum is "0.8710".
+
+```
+boston_scaled <- scale(Boston)
+summary(boston_scaled)
+class(boston_scaled)
+
+      crim                 zn               indus              chas              nox                rm         
+ Min.   :-0.419367   Min.   :-0.48724   Min.   :-1.5563   Min.   :-0.2723   Min.   :-1.4644   Min.   :-3.8764  
+ 1st Qu.:-0.410563   1st Qu.:-0.48724   1st Qu.:-0.8668   1st Qu.:-0.2723   1st Qu.:-0.9121   1st Qu.:-0.5681  
+ Median :-0.390280   Median :-0.48724   Median :-0.2109   Median :-0.2723   Median :-0.1441   Median :-0.1084  
+ Mean   : 0.000000   Mean   : 0.00000   Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.0000  
+ 3rd Qu.: 0.007389   3rd Qu.: 0.04872   3rd Qu.: 1.0150   3rd Qu.:-0.2723   3rd Qu.: 0.5981   3rd Qu.: 0.4823  
+ Max.   : 9.924110   Max.   : 3.80047   Max.   : 2.4202   Max.   : 3.6648   Max.   : 2.7296   Max.   : 3.5515  
+      age               dis               rad               tax             ptratio            black        
+ Min.   :-2.3331   Min.   :-1.2658   Min.   :-0.9819   Min.   :-1.3127   Min.   :-2.7047   Min.   :-3.9033  
+ 1st Qu.:-0.8366   1st Qu.:-0.8049   1st Qu.:-0.6373   1st Qu.:-0.7668   1st Qu.:-0.4876   1st Qu.: 0.2049  
+ Median : 0.3171   Median :-0.2790   Median :-0.5225   Median :-0.4642   Median : 0.2746   Median : 0.3808  
+ Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.0000  
+ 3rd Qu.: 0.9059   3rd Qu.: 0.6617   3rd Qu.: 1.6596   3rd Qu.: 1.5294   3rd Qu.: 0.8058   3rd Qu.: 0.4332  
+ Max.   : 1.1164   Max.   : 3.9566   Max.   : 1.6596   Max.   : 1.7964   Max.   : 1.6372   Max.   : 0.4406  
+     lstat              medv        
+ Min.   :-1.5296   Min.   :-1.9063  
+ 1st Qu.:-0.7986   1st Qu.:-0.5989  
+ Median :-0.1811   Median :-0.1449  
+ Mean   : 0.0000   Mean   : 0.0000  
+ 3rd Qu.: 0.6024   3rd Qu.: 0.2683  
+ Max.   : 3.5453   Max.   : 2.9865
+``` 
+
+The next part is to convert the dataset as dataframe and it is very simple with 
+boston_scaled <- as.data.frame(boston_scaled) command. Then we move the crim variable as our
+primary focus. This is done by making its values into categories.
+
+```
+Scaled crim
+
+       V1           
+ Min.   :-0.419367  
+ 1st Qu.:-0.410563  
+ Median :-0.390280  
+ Mean   : 0.000000  
+ 3rd Qu.: 0.007389  
+ Max.   : 9.924110 
+ 
+bins <- quantile(scaled_crim)
+bins
+           0%          25%          50%          75%         100% 
+-0.419366929 -0.410563278 -0.390280295  0.007389247  9.924109610
+
+
+Making it into the categories
+scaled_crim <- scale(boston_scaled$crim)
+summary(scaled_crim)
+
+bins <- quantile(scaled_crim)
+bins
+table(crime)
+crime <- cut(scaled_crim, breaks = bins, include.lowest = TRUE, label = c("low", "med_low", "med_high", "high"))
+
+table(crime)
+crime
+     low  med_low med_high     high 
+     127      126      126      127 
+```
+As you can see above the categories now have values ranging from low to high crime with each category having at least 126 values on their own. 
+
+We can now delete the original "crim" from the dataset and add the new "crime" to it.
+Then we can divide dataset to train and as test sets to make sure our model is working. It is always important to test how well the predictions fit to our model.
+```
+boston_scaled <- dplyr::select(boston_scaled, -crim)
+boston_scaled <- data.frame(boston_scaled, crime)
+n <- nrow(boston_scaled)
+
+ind <- sample(n,  size = n * 0.8)
+train <- boston_scaled[ind,]
+test <- boston_scaled[-ind,]
+
+correct_classes <- test$crime
+test <- dplyr::select(test, -crime)
+```
+
+### Now we can fit the LDA on the train set.
+Linear discriminant analysis finds the linear combination of the variables that separate the target variable classes. By this we can reduce dimensions of our data and cluster it.
+We will use the newly made crime rate as our target variable. 
+```
+lda.fit <- lda(crime~. , data = train)
+lda.fit
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+
+classes <- as.numeric(train$crime)
+plot(classes, dimen = 2, col = classes,  pch = classes)
+lda.arrows(lda.fit, myscale = 1)
+```
+And here is the result
+
+![](lda_arrows.png)
+
+The arrow that came through is rad, which means that accessibility to radial highways would explain the crime rates according to our model. We can test this with cross tabulating the data.
+
+```
+lda.pred <- predict(lda.fit, newdata = test)
+
+table(correct = correct_classes, predicted = lda.pred$class)
+
+ predicted
+correct    low med_low med_high high
+  low       13       9        1    0
+  med_low    5      16        2    0
+  med_high   0      10       17    2
+  high       0       0        0   27
+```
+Looks like the most accurate prediction was with "high crime" and the lowest was with "low crime". This basically
+means that its easier for the model to predict high crime rates and harder to predict low crime rates.
+
+### Distance measures and clustering
+
+We use manhattan and euclidean distance measures for finding the similarity or dissimilarity of objects. As we can see below these distances vary in many ways between all the core statistics.
+```
+data("Boston")
+boston_scaled1 <- scale(Boston)
+summary(boston_scaled1)
+
+dist_eu <- dist(boston_scaled1)
+summary(dist_eu)
+
+dist_man <- dist(boston_scaled1, method =  "manhattan")
+summary(dist_man)
+
+dist_eu <- dist(boston_scaled1)
+
+
+> summary(dist_eu) 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.1343  3.4620  4.8240  4.9110  6.1860 14.4000 
+
+
+> summary(dist_man)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.2662  8.4830 12.6100 13.5500 17.7600 48.8600 
+> 
+```
+Now we can do the first clustering with calculated distances.
+```
+km <- kmeans(dist_eu, centers = 15)
+km
+# plot the Boston dataset with clusters
+pairs(boston_scaled1, col = km$cluster)
+```
+
+![](eka_kmean.png)
+
+
+
+We also do the k-means clustering which does unsupervised clustering based on the similarity of the objects. To do the K-mean function, it need an argument on how many clusters it uses. We will find the optimal amount by doing WCSS. WCSS uses total of within cluster sum of squares behaves when the number of cluster changes. This means when we plot the number of clusters and total WCSS, we will see a dramatic drop somewhere on the plot. When the dramatic occurs, this is the number of clusters we shoulds use. As you can see below this number is two.
+
+```
+set.seed(123)
+k_max <- 10
+
+twcss <- sapply(1:k_max, function(k){kmeans(dist_eu, k)$tot.withinss})
+plot(1:k_max, twcss, type='b')
+```
+
+![](sum of squares.png)
+
+
+```
+# k-means clustering
+km <-kmeans(dist_eu, centers = 2)
+
+# plot the Boston dataset with clusters
+pairs(boston_scaled1, col = km$cluster)
+```
+
+![](oikee_cluster.png)
+
+
+It might be a bit hard to interpret any results on this because of the size of the picture. However we can see the red spot and black spot mixing and being separate also in some cases. Like rad and tax with crime variable. Medv (median value of owner-occupied homes in $1000s) and age (proportion of owner-occupied units built prior to 1940) seem to be mixing a lot.  
+
+Let´s try the superbonus also cause why not
+```
+model_predictors <- dplyr::select(train, -crime)
+
+dim(model_predictors)
+dim(lda.fit$scaling)
+
+matrix_product <- as.matrix(model_predictors) %*% lda.fit$scaling
+matrix_product <- as.data.frame(matrix_product)
+
+install.packages("plotly")
+library(plotly)
+
+plot_ly(surfacecolor = train$crime, x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers')
+```
+
+Unfortunately the error message saying "Webgl is not supported by your browser" keeps
+on coming and I was not able to download the wanted program for the school's computer.
+I also tried changing the plot_ly funtion but nothing seemed to work.. 
+Maybe 1 point for a good effort ;)
+
+
+
+# Chapter 4 - data wrangling
+This part is for the next week and it consists of data wrangling exercises which I will link to the Github also.
+
+```
+hd <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human_development.csv", stringsAsFactors = F)
+gii <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/gender_inequality.csv", stringsAsFactors = F, na.strings = "..")
+```
+Let's explore the structure, dimensions and summaries of the data frames
+
+```
+dim(gii) 
+195 rows and 10 columns
+
+dim(hd)
+195 rows and 8 columns
+
+str(gii)
+
+str(hd)
+
+summary(hd)
+
+summary(gii)
+```
+Then we change better names
+
+```
+colnames(gii)
+
+ > colnames(gii)
+ [1] "GII.Rank"                                     "Country"                                     
+ [3] "Gender.Inequality.Index..GII."                "Maternal.Mortality.Ratio"                    
+ [5] "Adolescent.Birth.Rate"                        "Percent.Representation.in.Parliament"        
+ [7] "Population.with.Secondary.Education..Female." "Population.with.Secondary.Education..Male."  
+ [9] "Labour.Force.Participation.Rate..Female."     "Labour.Force.Participation.Rate..Male."
+
+  colnames(gii)[1] <- "rank"
+  colnames(gii)[2] <- "country"
+  colnames(gii)[3] <- "GII"
+  colnames(gii)[4] <- "MMR"
+  colnames(gii)[5] <- "ABR"
+  colnames(gii)[6] <- "PRIP"
+  colnames(gii)[7] <- "PWSEF"
+  colnames(gii)[8] <- "PWSEM"
+  colnames(gii)[9] <- "LFPRF"
+  colnames(gii)[10] <- "LFPRM"
+    
+```
+And do the same thing for HDI
+
+```
+  
+  colnames(hd)  
+  [1] "HDI.Rank"                               "Country"                               
+  [3] "Human.Development.Index..HDI."          "Life.Expectancy.at.Birth"              
+  [5] "Expected.Years.of.Education"            "Mean.Years.of.Education"               
+  [7] "Gross.National.Income..GNI..per.Capita" "GNI.per.Capita.Rank.Minus.HDI.Rank"  
+  
+    colnames(hd)[1] <- "hd_rank"
+    colnames(hd)[2] <- "country"
+    colnames(hd)[3] <- "HDI"
+    colnames(hd)[4] <- "LEAB"
+    colnames(hd)[5] <- "EYOE"
+    colnames(hd)[6] <- "MYOE"
+    colnames(hd)[7] <- "GNI"
+    colnames(hd)[8] <- "GNIR_hdrank"
+```
+Then we combine the datafiles to have just one dataframe = human
+
+```    
+gii <- mutate(gii, edu2F_edu2M = (PWSEF/PWSEM)) 
+colnames(gii)
+summary(gii)
+
+gii <- mutate(gii, labF_labM = (LFPRF/LFPRM))
+human <- inner_join(gii, hd, by = "country", suffix = c("gii", "hd"))
+
+```    
+As you can see below, the "country" only exist once since the other one was deleted.
+
+ ```  
+ colnames(human)
+ [1] "rank"        "country"     "GII"         "MMR"         "ABR"         "PRIP"        "PWSEF"       "PWSEM"      
+ [9] "LFPRF"       "LFPRM"       "edu2F_edu2M" "labF_labM"   "hd_rank"     "HDI"         "LEAB"        "EYOE"       
+[17] "MYOE"        "GNI"         "GNIR_hdrank"
+```
+
+
+
+
+
