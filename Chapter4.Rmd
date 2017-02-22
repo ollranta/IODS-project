@@ -55,7 +55,7 @@ corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d"
 
 ![](corplott1.png)
 
-From this matrix you can see how the variables correlate negatively or positevely with each other. 
+From this matrix you can see, how the variables correlate negatively or positevely with each other. 
 For example dis "weighted mean of distances to five Boston employment centres" correlates very negatively with age"proportin of owner-occupied units built prior to 1940", nox" nitrogen oxides concentration (parts per 10 million)" and indus"proportion of non-retail business acres per town". So the bigger and redder the circle the more negative the correlation. 
 Positively correlated are the circles which are big and most blue. For example rad "accessibility to radial highways"
 and tax "full-value property-tax rate per\$10,000" correlate the most within our dataset. This chart makes it very easy to make observations of the correlation between the variables.
@@ -267,7 +267,7 @@ pairs(boston_scaled1, col = km$cluster)
 
 It might be a bit hard to interpret any results on this because of the size of the picture. However we can see the red spot and black spot mixing and being separate also in some cases. Like rad and tax with crime variable. Medv (median value of owner-occupied homes in $1000s) and age (proportion of owner-occupied units built prior to 1940) seem to be mixing a lot.  
 
-Let´s try the superbonus also cause why not
+LetÂ´s try the superbonus also cause why not
 ```
 model_predictors <- dplyr::select(train, -crime)
 
