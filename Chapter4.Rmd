@@ -1,5 +1,5 @@
 ---
-title: "Chapter4.Rmd"
+title: "Clustering and classification, Olli Rantanen 17.02.2017"
 output: html_document
 ---
 
@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Chapter 4. Clustering and classification, Olli Rantanen 14.02.2017
+# Chapter 4, Clustering and classification, Olli Rantanen 17.02.2017
 
 This time our exercise is about clustering and classification. Our data "Housing Values in Suburbs of Boston" has variables about crime, socioeconomical factors for example "lower status of the population" and many other kinds of information about the population on the area. The most important variable is crime (crim) which is described to represent the per capita crime rate by town. The data frame has 506 rows and 14 columns totally. 
 Let's bring our data and have a look of its structure
@@ -19,7 +19,7 @@ data("Boston")
 str(Boston)
 dim(Boston)
 
-'data.frame':	506 obs. of  14 variables:
+# 'data.frame':	506 obs. of  14 variables:
  $ crim   : num  0.00632 0.02731 0.02729 0.03237 0.06905 ...
  $ zn     : num  18 0 0 0 0 0 12.5 12.5 12.5 12.5 ...
  $ indus  : num  2.31 7.07 7.07 2.18 2.18 2.18 7.87 7.87 7.87 7.87 ...
@@ -35,7 +35,7 @@ dim(Boston)
  $ lstat  : num  4.98 9.14 4.03 2.94 5.33 ...
  $ medv   : num  24 21.6 34.7 33.4 36.2 28.7 22.9 27.1 16.5 18.9 ...
  
- [1] 506  14
+[1] 506  14
 ```
 And let's have a closer look of the variables of the data frame
 
