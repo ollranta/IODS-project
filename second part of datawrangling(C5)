@@ -1,0 +1,31 @@
+# We are finally able to start the chapter 5. Let's first change the GNI value to numeric 
+
+human$GNI <- str_replace(human$GNI, pattern=",", replace ="") %>% as.numeric() 
+
+keep <- c("Country", "Edu2.FM", "Labo.FM", "Life.Exp", "Edu.Exp", "GNI", "Mat.Mor", "Ado.Birth", "Parli.F")
+human <- dplyr::select(human, one_of(keep))
+
+
+data.frame(human[-1], comp = complete.cases(human))
+
+# Exclude NA values
+
+human_ <- filter(human, complete.cases(human))
+
+# We do not want to keep the regions, only the countries, so we delete the last rows
+last <- nrow(human) - 40
+
+human_ <- human[1:last, ]
+
+# Country as rowname
+rownames(human_) <- human_$Country
+dim(human_)
+(155 rows, 8 columns)
+
+human_ <- dplyr::select(human_, -Country)
+
+# Now we just write over the human csv with the new one and then we can move on to next exercise.
+write.csv(human_, file = "humanreal.csv", row.names = FALSE)
+human <- read.csv("humanreal.csv", sep=",", header= T)
+
+
