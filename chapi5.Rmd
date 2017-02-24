@@ -1,0 +1,219 @@
+---
+title: "Chapter 5: Dimensionality reduction techniques"
+output: html_document
+---
+
+```{r setup, include= FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Chapter 5. 23.02.2017
+
+Original source for the human dataset.
+
+http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human1.txt
+
+muista se muokkaus
+
+### 1-2.Exercise 
+Last time we created the "human" dataframe which has information about the core development index themes. Let's start the first theme which is continuing the data wrangling. I will link these steps to here but I won't use your time for the data wrangling so we can start the actual exercise.  
+
+Our dataset consist of 155 observations and 8 variables. These variables have data about the core human development indexes. I used the given names because with my own variable names I experienced some trouble and had to use the given ones. Anyway below you can see the summary of the variables and the explanations. 
+
+```
+summary(human2)
+    Edu2.FM          Labo.FM          Edu.Exp         Life.Exp    
+ Min.   :0.1717   Min.   :0.1857   Min.   : 5.40   Min.   :49.00  
+ 1st Qu.:0.7264   1st Qu.:0.5984   1st Qu.:11.25   1st Qu.:66.30  
+ Median :0.9375   Median :0.7535   Median :13.50   Median :74.20  
+ Mean   :0.8529   Mean   :0.7074   Mean   :13.18   Mean   :71.65  
+ 3rd Qu.:0.9968   3rd Qu.:0.8535   3rd Qu.:15.20   3rd Qu.:77.25  
+ Max.   :1.4967   Max.   :1.0380   Max.   :20.20   Max.   :83.50  
+      GNI            Mat.Mor         Ado.Birth         Parli.F     
+ Min.   :   581   Min.   :   1.0   Min.   :  0.60   Min.   : 0.00  
+ 1st Qu.:  4198   1st Qu.:  11.5   1st Qu.: 12.65   1st Qu.:12.40  
+ Median : 12040   Median :  49.0   Median : 33.60   Median :19.30  
+ Mean   : 17628   Mean   : 149.1   Mean   : 47.16   Mean   :20.91  
+ 3rd Qu.: 24512   3rd Qu.: 190.0   3rd Qu.: 71.95   3rd Qu.:27.95  
+ Max.   :123124   Max.   :1100.0   Max.   :204.80   Max.   :57.50
+
+
+Edu2.FM = Population.with.Secondary.Education (Female/Male) 
+Labo.FM = Labour Force Participation Rate (Female/Male) 
+Life.Exp = Life.Expectancy.at.Birth
+Edu.Exp = Expected Years of Education 
+GNI = Gross.National.Income per Capita (dollars)
+Mat.Mor = Maternal.Mortality.Ratio
+Ado.Birth = Adolescent.Birth.Rate
+Parli.F = Percent.Representation.in.Parliament (Female) 
+
+ggpairs(human2)
+
+```
+![](ggpairs5.png)
+
+And next we can see a correlation plot
+```
+cor(human2) %>% corrplot(method="circle", type="upper")
+```
+![Correlation plot](cor5.png)
+
+We can make some observations based upon these two correlation plots. Correlation plot indicates with blue and red color plus the size of the circle. For example, there is a positive correlation between expected years of education and life expentancy. Maybe this could be interpreted in a way that suggests that when you spend more time getting educated - you will get safer job etc. Or maybe this just indicates the higher life expectancy in developed countries where people also enjoy more schooling than people in poorer countries obviously.   
+
+On the other hand there seems to be a strong negative correlation between life expectancy and maternal mortality. This is not that surprising considering that young people give birth and when they die they obviously won't have a very long life expectancy. Also there is evidence for less education and maternal 
+mortality. 
+
+From the variable summary we can see that the highest GNI 123 124 dollars and the lowest is 581 dollars. This really gives a perspective about income inequality in the world. Also there is countries which have no female represantation in parliament and the highest one is 57 %. The mean of that variable is also just 20.91 % which is very low. 
+
+Show the variability captured by the principal components. Draw a biplot displaying the observations by the first two principal components (PC1 coordinate in x-axis, PC2 coordinate in y-axis), along with arrows representing the original variables. (0-2 points)
+
+### 3-5. Exercise 
+Well that was depressing, let's turn the page and move on to the next exercise which is about principal component analysis(PCA). First we do this without the standardization and as we might expect the results will not be that good. 
+
+PCA helps us to find the principal components of the data. This makes it easier for us to handle the data because there are a lot less data to operate with.By using the biplot we visualize the connections between two representations of the same data. The scatter plot (grey) shows us two principal component which represent the observations. The pink arrows then visualize the connection with the original variables and the principal components. The arrows are closer to each other when they correlate for example Ado.birth and Mat.Mor.
+As you can see the x-axis represents the PC1 and all the variables which are on the "middle" for example Ado.Birth correlate with it. The variables which are towars the y-axis (Labo and Parli) correlate with PC2. 
+
+on the left side of the biplot there are richer countries and vice versa. 
+```
+whuman2 <- prcomp(human2)
+
+biplot(whuman2, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+```
+![without the standardization](whuman2.png)
+
+```
+> summary(whuman2)
+Importance of components:
+                             PC1      PC2   PC3   PC4   PC5   PC6    PC7    PC8
+Standard deviation     1.854e+04 185.5219 25.19 11.45 3.766 1.566 0.1912 0.1591
+Proportion of Variance 9.999e-01   0.0001  0.00  0.00 0.000 0.000 0.0000 0.0000
+Cumulative Proportion  9.999e-01   1.0000  1.00  1.00 1.000 1.000 1.0000 1.0000
+```
+As we can see without the standardization the biplot makes really no sense since they are not on the same scale. Let's see what happens when we standardize the data first. 
+```
+human2_std <-scale(human2)
+human2_pca <- prcomp(human2_std)
+summary(human2_pca)
+
+Importance of components:
+                          PC1    PC2     PC3     PC4     PC5     PC6     PC7     PC8
+Standard deviation     2.0708 1.1397 0.87505 0.77886 0.66196 0.53631 0.45900 0.32224
+Proportion of Variance 0.5361 0.1624 0.09571 0.07583 0.05477 0.03595 0.02634 0.01298
+Cumulative Proportion  0.5361 0.6984 0.79413 0.86996 0.92473 0.96069 0.98702 1.00000
+```
+The summary of the data makes a lot more sense now, and we can also draw the biplot with the scaled data.
+```
+biplot(human2_pca, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+```
+![](biplot2.png)
+
+We can clearly see that the drawn biplots differ a lot from eachother. On the first plot only the GNI is significant since the GNI has its own huge scale compared to other arrows. It correlates very positively with the pc1. 
+On the second picture GNI, expected education and life expectancy correlate. PC1 could maybe be thinked as a wealth indicator, your country is doing very well if its closer to left and poorly when its closer to right side.
+If you think about this it makes a lot sence since they are link so much. When the country is rich it can educate people more and they are more likely to live longer because medication and things like that are so advanced. 
+
+Labour force participation (Men and female) correlate with the number of women on the parliament. When women can work as a equal to men they can also participate more on the politics. Also on the right side we can see the negative values which do not correlate with thing like GNI such as maternal mortality rate and being pregnant young (15-19 year). PC2 can be thought as a indicator of gender equality. The higher on the Y-scale the better the equality between genders. 
+
+On personal note these all make very much sense, if you look at the countries on the plot the "best" countries for women and wealth are the nordics. If you go on the other direction you see countries some of which are on a war or poor. 
+
+# Tea dataset
+
+First we download the new package called factominer and then we focus on one of its datas called tea. The tea dataframe has 300 observations and 36 variables.
+```
+> dim(tea)
+[1] 300  36
+> str(tea)
+'data.frame':	300 obs. of  36 variables:
+ $ breakfast       : Factor w/ 2 levels "breakfast","Not.breakfast": 1 1 2 2 1 2 1 2 1 1 ...
+ $ tea.time        : Factor w/ 2 levels "Not.tea time",..: 1 1 2 1 1 1 2 2 2 1 ...
+ $ evening         : Factor w/ 2 levels "evening","Not.evening": 2 2 1 2 1 2 2 1 2 1 ...
+ $ lunch           : Factor w/ 2 levels "lunch","Not.lunch": 2 2 2 2 2 2 2 2 2 2 ...
+ $ dinner          : Factor w/ 2 levels "dinner","Not.dinner": 2 2 1 1 2 1 2 2 2 2 ...
+ $ always          : Factor w/ 2 levels "always","Not.always": 2 2 2 2 1 2 2 2 2 2 ...
+ $ home            : Factor w/ 2 levels "home","Not.home": 1 1 1 1 1 1 1 1 1 1 ...
+ $ work            : Factor w/ 2 levels "Not.work","work": 1 1 2 1 1 1 1 1 1 1 ...
+ $ tearoom         : Factor w/ 2 levels "Not.tearoom",..: 1 1 1 1 1 1 1 1 1 2 ...
+ $ friends         : Factor w/ 2 levels "friends","Not.friends": 2 2 1 2 2 2 1 2 2 2 ...
+ $ resto           : Factor w/ 2 levels "Not.resto","resto": 1 1 2 1 1 1 1 1 1 1 ...
+ $ pub             : Factor w/ 2 levels "Not.pub","pub": 1 1 1 1 1 1 1 1 1 1 ...
+ $ Tea             : Factor w/ 3 levels "black","Earl Grey",..: 1 1 2 2 2 2 2 1 2 1 ...
+ $ How             : Factor w/ 4 levels "alone","lemon",..: 1 3 1 1 1 1 1 3 3 1 ...
+ $ sugar           : Factor w/ 2 levels "No.sugar","sugar": 2 1 1 2 1 1 1 1 1 1 ...
+ $ how             : Factor w/ 3 levels "tea bag","tea bag+unpackaged",..: 1 1 1 1 1 1 1 1 2 2 ...
+ $ where           : Factor w/ 3 levels "chain store",..: 1 1 1 1 1 1 1 1 2 2 ...
+ $ price           : Factor w/ 6 levels "p_branded","p_cheap",..: 4 6 6 6 6 3 6 6 5 5 ...
+ $ age             : int  39 45 47 23 48 21 37 36 40 37 ...
+ $ sex             : Factor w/ 2 levels "F","M": 2 1 1 2 2 2 2 1 2 2 ...
+ $ SPC             : Factor w/ 7 levels "employee","middle",..: 2 2 4 6 1 6 5 2 5 5 ...
+ $ Sport           : Factor w/ 2 levels "Not.sportsman",..: 2 2 2 1 2 2 2 2 2 1 ...
+ $ age_Q           : Factor w/ 5 levels "15-24","25-34",..: 3 4 4 1 4 1 3 3 3 3 ...
+ $ frequency       : Factor w/ 4 levels "1/day","1 to 2/week",..: 1 1 3 1 3 1 4 2 3 3 ...
+ $ escape.exoticism: Factor w/ 2 levels "escape-exoticism",..: 2 1 2 1 1 2 2 2 2 2 ...
+ $ spirituality    : Factor w/ 2 levels "Not.spirituality",..: 1 1 1 2 2 1 1 1 1 1 ...
+ $ healthy         : Factor w/ 2 levels "healthy","Not.healthy": 1 1 1 1 2 1 1 1 2 1 ...
+ $ diuretic        : Factor w/ 2 levels "diuretic","Not.diuretic": 2 1 1 2 1 2 2 2 2 1 ...
+ $ friendliness    : Factor w/ 2 levels "friendliness",..: 2 2 1 2 1 2 2 1 2 1 ...
+ $ iron.absorption : Factor w/ 2 levels "iron absorption",..: 2 2 2 2 2 2 2 2 2 2 ...
+ $ feminine        : Factor w/ 2 levels "feminine","Not.feminine": 2 2 2 2 2 2 2 1 2 2 ...
+ $ sophisticated   : Factor w/ 2 levels "Not.sophisticated",..: 1 1 1 2 1 1 1 2 2 1 ...
+ $ slimming        : Factor w/ 2 levels "No.slimming",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ exciting        : Factor w/ 2 levels "exciting","No.exciting": 2 1 2 2 2 2 2 2 2 2 ...
+ $ relaxing        : Factor w/ 2 levels "No.relaxing",..: 1 1 2 2 2 2 2 2 2 2 ...
+ $ effect.on.health: Factor w/ 2 levels "effect on health",..: 2 2 2 2 2 2 2 2 2 2 ...
+```
+Then we shall draw some ggplots with these variables. I thought that 36 variables would be nice to show on 3 pictures since it makes it easier to read. 
+```
+gather(tea[1:12]) %>% ggplot(aes(value)) + geom_bar(fill="#FF9999", colour="black")+ theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + facet_wrap("key", scales = "free") 
+
+gather(tea[13:24]) %>% ggplot(aes(value)) + geom_bar(fill="#FF9999", colour="black")+ theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + facet_wrap("key", scales = "free")
+
+gather(tea[25:36]) %>% ggplot(aes(value)) + geom_bar(fill="#FF9999", colour="black")+ theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + facet_wrap("key", scales = "free") 
+```
+
+![Variables from 1 to 12](ggplot51.png)
+
+
+
+
+![Variables from 13 to 24](ggplot52.png)
+
+
+
+![Variables from 25 to 36](ggplot53.png)
+
+
+
+
+
+So for the final part I cut the data fame to 6 variables which makes it easier to handle the data.
+
+![](5555.JPG)
+
+
+ And let's have a look also of the histogram of this data.
+ 
+![](uusing.png)
+
+From the data we can see that most people make their tea with the teabag and they do not add anything extra to it. Earl grey is the typical type of tea and people usually drink their tea in a chain store rather than tea shop. 
+
+Then it's time for the multiple correspondence analysis. It can be used for dimension reduction and to detect patterns or structure of the data. We hope  to find some kind of evidence that these variables have something in common. 
+
+From the factor map below we can see that Dim1 contains more of a hipster perspective maybe since there is both unpackaged and tea shop favors. On the left on the x-axis there is maybe a bit more conservative taste like Earl grey and using teabags. 
+
+![](mca51.png)
+
+Let's then move on to biplotting the data. I googled how to biplot mca in a good way and found "factoextra" package which I will use for the biplot.
+
+```
+install.packages("devtools")
+library("devtools")
+install_github("kassambara/factoextra")
+library("factoextra")
+
+fviz_mca_biplot(mca, axes = c(1, 2),  geom = c("point", "text", "arrow"))
+```
+
+![](biplotmca.png)
+
+On this biplot the we can explore the correlations between variables(red) and the observations(blue) and the standard deviation. 
+
+
