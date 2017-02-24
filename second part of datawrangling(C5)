@@ -26,6 +26,70 @@ human_ <- dplyr::select(human_, -Country)
 
 # Now we just write over the human csv with the new one and then we can move on to next exercise.
 write.csv(human_, file = "humanreal.csv", row.names = FALSE)
-human <- read.csv("humanreal.csv", sep=",", header= T)
+human2 <- read.csv("humanreal.csv", sep=",", header= T)
 
+ggpairs(human2)
+
+summary(human2)
+
+cor(human2) %>% corrplot(method="circle", type="upper")
+
+# So let's start  the PCA first without the standardization.
+
+whuman2 <- prcomp(human2)
+
+biplot(whuman2, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+
+summary(whuman2)
+
+
+# And then we do the standardized version
+
+human2_std <-scale(human2)
+
+human2_pca <- prcomp(human2_std)
+summary(human2_pca)
+
+biplot(human2_pca, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+
+# Now it's time for the last part which is operating with tea data frame.
+
+install.packages("FactoMineR")
+library(FactoMineR)
+data("tea")
+summary(tea)
+dim(tea)
+str(tea)
+
+gather(tea[25:36]) %>% ggplot(aes(value)) + geom_bar(fill="#FF9999", colour="black")+ theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + facet_wrap("key", scales = "free") 
+
+# Let´s cut down the data help the handling of data
+
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+
+
+tea_time <- dplyr::select(tea, one_of(keep_columns))
+
+
+summary(tea_time)
+str(tea_time)
+
+gather(tea_time) %>% ggplot(aes(value)) + geom_bar(fill="#FF9999", colour="black") + facet_wrap("key", scales = "free") + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+
+mca <- MCA(tea_time, graph = FALSE)
+
+
+summary(mca)
+
+# visualize MCA
+plot(mca, habillage = "quali",  invisible=c("ind"))
+
+
+install.packages("devtools")
+library("devtools")
+install_github("kassambara/factoextra")
+library("factoextra")
+
+fviz_mca_biplot(mca, axes = c(1, 2),  geom = c("point", "text", "arrow"))
 
